@@ -16,18 +16,15 @@ train_data = pd.read_csv('train_data.csv', index_col=0, parse_dates=True)
 train_actual = train_data['total load actual']
 
 # Load models
-sarimax_model = joblib.load('sarimax_model.pkl')
-arima_model = joblib.load('arima_model.pkl')
 ets_model = joblib.load('ets_model.pkl')
 prophet_model = joblib.load('prophet_model.pkl')
 svr_model = joblib.load('svr_model.pkl')
 ann_model = tf.keras.models.load_model('ann_model.h5')
 lstm_model = tf.keras.models.load_model('lstm_model.h5')
-hybrid_model = joblib.load('hybrid_model.pkl')
 
 # Function to make predictions
 def make_forecast(model, input_data, forecast_type):
-    if forecast_type in ['SARIMAX', 'ARIMA', 'ETS', 'Prophet', 'SVR', 'Hybrid']:
+    if forecast_type in ['ETS', 'Prophet', 'SVR']:
         forecast = model.forecast(len(input_data))
     elif forecast_type == 'ANN' or forecast_type == 'LSTM':
         input_data = np.array(input_data).reshape((1, len(input_data), 1))
@@ -39,7 +36,7 @@ def make_forecast(model, input_data, forecast_type):
 
 # Navigation
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["SARIMAX Forecast", "ARIMA Forecast", "ETS Forecast","Prophet Forecast","SVR Forecast","ANN Forecast","LSTM Forecast","Hybrid Forecast"])
+page = st.sidebar.radio("Go to", ["ETS Forecast", "Prophet Forecast", "SVR Forecast", "ANN Forecast", "LSTM Forecast"])
 
 # Forecasting Pages
 def display_forecast_page(forecast_type, model):
@@ -106,11 +103,7 @@ def display_forecast_page(forecast_type, model):
             plt.legend()
             st.pyplot()
 
-if page == "SARIMAX Forecast":
-    display_forecast_page("SARIMAX", sarimax_model)
-elif page == "ARIMA Forecast":
-    display_forecast_page("ARIMA", arima_model)
-elif page == "ETS Forecast":
+if page == "ETS Forecast":
     display_forecast_page("ETS", ets_model)
 elif page == "Prophet Forecast":
     display_forecast_page("Prophet", prophet_model)
@@ -120,5 +113,3 @@ elif page == "ANN Forecast":
     display_forecast_page("ANN", ann_model)
 elif page == "LSTM Forecast":
     display_forecast_page("LSTM", lstm_model)
-elif page == "Hybrid Forecast":
-    display_forecast_page("Hybrid", hybrid_model)
