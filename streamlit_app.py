@@ -39,7 +39,7 @@ lstm_model = load_model('lstm_model.h5')
 # Function to make predictions
 def make_forecast(model, input_data, forecast_type):
     if forecast_type == 'Prophet':
-        future = pd.DataFrame({'ds': pd.date_range(start=test_data.index[0], periods=len(input_data))})
+        future = pd.DataFrame({'ds': test_data.index[:len(input_data)]})
         forecast = model.predict(future)['yhat'].values
     elif forecast_type in ['ETS', 'SVR']:
         forecast = model.forecast(len(input_data))
