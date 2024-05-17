@@ -44,9 +44,13 @@ def make_forecast(model, input_data, forecast_type):
     elif forecast_type == 'SVR':
         input_data = np.array(input_data).reshape(-1, 1)
         forecast = model.predict(input_data)
-    elif forecast_type in ['ETS']:
+    elif forecast_type == 'ETS':
         forecast = model.forecast(len(input_data))
-    elif forecast_type in ['ANN', 'LSTM']:
+    elif forecast_type == 'ANN':
+        input_data = np.array(input_data).reshape(1, len(input_data))
+        forecast = model.predict(input_data)
+        forecast = forecast.flatten()
+    elif forecast_type == 'LSTM':
         input_data = np.array(input_data).reshape((1, len(input_data), 1))
         forecast = model.predict(input_data)
         forecast = forecast.flatten()
