@@ -41,7 +41,10 @@ def make_forecast(model, input_data, forecast_type):
     if forecast_type == 'Prophet':
         future = pd.DataFrame({'ds': test_data.index[:len(input_data)]})
         forecast = model.predict(future)['yhat'].values
-    elif forecast_type in ['ETS', 'SVR']:
+    elif forecast_type == 'SVR':
+        input_data = np.array(input_data).reshape(-1, 1)
+        forecast = model.predict(input_data)
+    elif forecast_type in ['ETS']:
         forecast = model.forecast(len(input_data))
     elif forecast_type in ['ANN', 'LSTM']:
         input_data = np.array(input_data).reshape((1, len(input_data), 1))
