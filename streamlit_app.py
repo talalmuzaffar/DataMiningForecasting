@@ -33,7 +33,6 @@ def load_model(file_path):
 ets_model = load_model('ets_model.pkl')
 prophet_model = load_model('prophet_model.pkl')
 svr_model = load_model('svr_model.pkl')
-ann_model = load_model('ann_model.h5')
 lstm_model = load_model('lstm_model.h5')
 
 # Function to make predictions
@@ -46,10 +45,6 @@ def make_forecast(model, input_data, forecast_type):
         forecast = model.predict(input_data)
     elif forecast_type == 'ETS':
         forecast = model.forecast(len(input_data))
-    elif forecast_type == 'ANN':
-        input_data = np.array(input_data).reshape(1, len(input_data))
-        forecast = model.predict(input_data)
-        forecast = forecast.flatten()
     elif forecast_type == 'LSTM':
         input_data = np.array(input_data).reshape((1, len(input_data), 1))
         forecast = model.predict(input_data)
@@ -60,7 +55,7 @@ def make_forecast(model, input_data, forecast_type):
 
 # Navigation
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["ETS Forecast", "Prophet Forecast", "SVR Forecast", "ANN Forecast", "LSTM Forecast"])
+page = st.sidebar.radio("Go to", ["ETS Forecast", "Prophet Forecast", "SVR Forecast", "LSTM Forecast"])
 
 # Forecasting Pages
 def display_forecast_page(forecast_type, model):
@@ -137,7 +132,5 @@ elif page == "Prophet Forecast":
     display_forecast_page("Prophet", prophet_model)
 elif page == "SVR Forecast":
     display_forecast_page("SVR", svr_model)
-elif page == "ANN Forecast":
-    display_forecast_page("ANN", ann_model)
 elif page == "LSTM Forecast":
     display_forecast_page("LSTM", lstm_model)
