@@ -1,7 +1,7 @@
 joblib
 matplotlib
 numpy
-pandas
+pandas<2.0.0
 scikit_learn
 statsmodels
 prophet
