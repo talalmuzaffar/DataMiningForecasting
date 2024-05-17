@@ -60,7 +60,7 @@ def display_forecast_page(forecast_type, model):
         st.error(f"{forecast_type} model is not available")
         return
 
-    st.title(f'Total Load Actual Forecast ({forecast_type})')
+    st.title(f'Load Forecast ({forecast_type})')
     total_load_forecast = st.text_area('Enter Total Load Forecast (comma-separated)', '')
 
     if st.button(f'Get {forecast_type} Forecast'):
