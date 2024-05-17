@@ -7,16 +7,6 @@ import joblib
 import tensorflow as tf
 import os
 
-# Custom CSS for better UI
-st.markdown("""
-    <style>
-    .main { background-color: #f0f2f6; }
-    .sidebar .sidebar-content { background-color: #2e3b4e; color: white; }
-    .stButton button { background-color: #2e3b4e; color: white; }
-    .stTextInput input { background-color: #f0f2f6; }
-    </style>
-    """, unsafe_allow_html=True)
-
 # Load test and train data
 test_data = pd.read_csv('test_data.csv', index_col=0, parse_dates=True)
 test_actual = test_data['total load actual']
@@ -60,77 +50,68 @@ def make_forecast(model, input_data, forecast_type):
         forecast = []
     return forecast
 
-# Navigation
-st.sidebar.title("Navigation")
-st.sidebar.markdown("<div style='text-align: center; color: white;'>Forecasting Models</div>", unsafe_allow_html=True)
-page = st.sidebar.radio("Go to", ["ETS Forecast", "Prophet Forecast", "SVR Forecast", "LSTM Forecast"])
+# Sidebar Navigation
+st.sidebar.title("Forecasting Models")
+page = st.sidebar.radio("Select Model", ["ETS Forecast", "Prophet Forecast", "SVR Forecast", "LSTM Forecast"])
 
-# Forecasting Pages
+# Main Content
 def display_forecast_page(forecast_type, model):
     if model is None:
-        st.error(f"Model for {forecast_type} is not available")
+        st.error(f"{forecast_type} model is not available")
         return
 
     st.title(f'Total Load Actual Forecast ({forecast_type})')
-    
-    st.markdown("""
-        <style>
-        .stTextArea textarea { background-color: #f0f2f6; }
-        </style>
-    """, unsafe_allow_html=True)
-    total_load_forecast = st.text_area('Total Load Forecast (comma-separated)', '')
-    
+    total_load_forecast = st.text_area('Enter Total Load Forecast (comma-separated)', '')
+
     if st.button(f'Get {forecast_type} Forecast'):
         total_load_forecast = [float(i) for i in total_load_forecast.split(',')]
-        
         if len(total_load_forecast) < 10:
             st.error("Please enter at least 10 forecasts.")
         else:
             forecast = make_forecast(model, total_load_forecast[:10], forecast_type)
-            
             mse = mean_squared_error(test_actual[:len(forecast)], forecast)
             rmse = np.sqrt(mse)
             mae = mean_absolute_error(test_actual[:len(forecast)], forecast)
-            st.write('### Accuracy Metrics:')
-            st.write(f'**Mean Squared Error (MSE):** {mse}')
-            st.write(f'**Root Mean Squared Error (RMSE):** {rmse}')
-            st.write(f'**Mean Absolute Error (MAE):** {mae}')
+            
+            st.subheader('Accuracy Metrics:')
+            st.write(f'Mean Squared Error (MSE): {mse}')
+            st.write(f'Root Mean Squared Error (RMSE): {rmse}')
+            st.write(f'Mean Absolute Error (MAE): {mae}')
             
             forecast_df = pd.DataFrame({'Forecast': forecast}, index=test_data.index[:10])
-            
             df = pd.concat([test_data[:10].reset_index(), forecast_df.reset_index(drop=True)], axis=1)
             
-            st.write('### Forecast Data:')
-            st.write(df)
+            st.subheader('Forecast Data:')
+            st.dataframe(df)
             
-            plt.figure(figsize=(10, 6))
-            plt.plot(train_data.index, train_actual, label='Train')
-            plt.plot(test_data.index, test_actual, label='Test')
-            plt.plot(df['index'], df['Forecast'], label='Forecast', linestyle='--')
-            plt.xlabel('Date')
-            plt.ylabel('Total Load Actual')
-            plt.title(f'Total Load Actual Forecast vs Actual ({forecast_type})')
-            plt.legend()
-            st.pyplot()
+            fig, ax = plt.subplots(figsize=(10, 6))
+            ax.plot(train_data.index, train_actual, label='Train')
+            ax.plot(test_data.index, test_actual, label='Test')
+            ax.plot(df['index'], df['Forecast'], label='Forecast')
+            ax.set_xlabel('Date')
+            ax.set_ylabel('Total Load Actual')
+            ax.set_title(f'Total Load Actual Forecast vs Actual ({forecast_type})')
+            ax.legend()
+            st.pyplot(fig)
             
             for column in test_data.columns[:-1]:
-                plt.figure(figsize=(10, 6))
-                plt.plot(test_data.index[:10], test_data[column][:10], label='Actual')
-                plt.plot(test_data.index[:10], df[column], label='Forecast', linestyle='--')
-                plt.xlabel('Date')
-                plt.ylabel(column)
-                plt.title(f'{column} Forecast vs Actual ({forecast_type})')
-                plt.legend()
-                st.pyplot()
+                fig, ax = plt.subplots(figsize=(10, 6))
+                ax.plot(test_data.index[:10], test_data[column][:10], label='Actual')
+                ax.plot(test_data.index[:10], df[column], label='Forecast')
+                ax.set_xlabel('Date')
+                ax.set_ylabel(column)
+                ax.set_title(f'{column} Forecast vs Actual ({forecast_type})')
+                ax.legend()
+                st.pyplot(fig)
             
-            plt.figure(figsize=(10, 6))
-            plt.plot(test_data.index[:10], df['total load actual'][:10] - df['Forecast'], label='Difference', linestyle='--')
-            plt.xlabel('Date')
-            plt.ylabel('Difference')
-            plt.title(f'Difference Between Forecast and Actual Values ({forecast_type})')
-            plt.axhline(0, color='black', linestyle='--')
-            plt.legend()
-            st.pyplot()
+            fig, ax = plt.subplots(figsize=(10, 6))
+            ax.plot(test_data.index[:10], df['total load actual'][:10] - df['Forecast'], label='Difference')
+            ax.set_xlabel('Date')
+            ax.set_ylabel('Difference')
+            ax.set_title(f'Difference Between Forecast and Actual Values ({forecast_type})')
+            ax.axhline(0, color='black', linestyle='--')
+            ax.legend()
+            st.pyplot(fig)
 
 if page == "ETS Forecast":
     display_forecast_page("ETS", ets_model)
