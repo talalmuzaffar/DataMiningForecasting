@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 import joblib
 import tensorflow as tf
+import os
 
 # Suppress warnings
 st.set_option('deprecation.showPyplotGlobalUse', False)
@@ -16,17 +17,30 @@ train_data = pd.read_csv('train_data.csv', index_col=0, parse_dates=True)
 train_actual = train_data['total load actual']
 
 # Load models
-ets_model = joblib.load('ets_model.pkl')
-prophet_model = joblib.load('prophet_model.pkl')
-svr_model = joblib.load('svr_model.pkl')
-ann_model = tf.keras.models.load_model('ann_model.h5')
-lstm_model = tf.keras.models.load_model('lstm_model.h5')
+def load_model(file_path):
+    if os.path.exists(file_path):
+        try:
+            if file_path.endswith('.pkl'):
+                return joblib.load(file_path)
+            elif file_path.endswith('.h5'):
+                return tf.keras.models.load_model(file_path)
+        except Exception as e:
+            st.error(f"Error loading model {file_path}: {e}")
+    else:
+        st.error(f"Model file {file_path} not found")
+    return None
+
+ets_model = load_model('ets_model.pkl')
+prophet_model = load_model('prophet_model.pkl')
+svr_model = load_model('svr_model.pkl')
+ann_model = load_model('ann_model.h5')
+lstm_model = load_model('lstm_model.h5')
 
 # Function to make predictions
 def make_forecast(model, input_data, forecast_type):
     if forecast_type in ['ETS', 'Prophet', 'SVR']:
         forecast = model.forecast(len(input_data))
-    elif forecast_type == 'ANN' or forecast_type == 'LSTM':
+    elif forecast_type in ['ANN', 'LSTM']:
         input_data = np.array(input_data).reshape((1, len(input_data), 1))
         forecast = model.predict(input_data)
         forecast = forecast.flatten()
@@ -40,6 +54,10 @@ page = st.sidebar.radio("Go to", ["ETS Forecast", "Prophet Forecast", "SVR Forec
 
 # Forecasting Pages
 def display_forecast_page(forecast_type, model):
+    if model is None:
+        st.error(f"Model for {forecast_type} is not available")
+        return
+
     st.title(f'Total Load Actual Forecast ({forecast_type})')
     
     # User input
