@@ -8,3 +8,5 @@ prophet
 streamlit
 tensorflow
 tensorflow_intel
+flask
+flask_cors

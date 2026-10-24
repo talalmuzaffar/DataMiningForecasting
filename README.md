@@ -43,15 +43,26 @@ A time series forecasting system that implements multiple machine learning and d
 
 ```
 DataMiningForecasting/
-├── streamlit_app.py      # Main Streamlit interface
-├── app.py                # Core application logic
-├── train_data.csv       # Training dataset
-├── test_data.csv        # Testing dataset
-├── lstm_model.h5        # LSTM model file
-├── ann_model.h5         # ANN model file
-├── svr_model.pkl        # SVR model file
-├── prophet_model.pkl    # Prophet model file
-└── ets_model.pkl        # ETS model file
+├── streamlit_app.py            # Main Streamlit interface
+├── app.py                      # Flask REST API serving the models (python app.py)
+├── data_mining_forecasting/
+│   ├── __init__.py
+│   ├── config.py               # Paths to the datasets and model files
+│   ├── data.py                 # Loads the train/test datasets
+│   ├── models.py               # Loads the saved models and makes forecasts
+│   ├── charts.py               # Forecast vs actual plots
+│   ├── ui.py                   # Streamlit forecast page
+│   └── api.py                  # Flask routes used by app.py
+├── data/
+│   ├── train_data.csv          # Training dataset
+│   └── test_data.csv           # Testing dataset
+├── models/
+│   ├── lstm_model.h5           # LSTM model file
+│   ├── ann_model.h5            # ANN model file
+│   ├── svr_model.pkl           # SVR model file
+│   ├── prophet_model.pkl       # Prophet model file
+│   └── ets_model.pkl           # ETS model file
+└── requirements.txt
 ```
 
 ## 👥 Authors
